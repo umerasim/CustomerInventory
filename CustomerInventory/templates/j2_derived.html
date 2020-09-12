@@ -1,0 +1,12 @@
+{% extends "j2_base.html" %}
+{% block title %}Main Page{% endblock %}
+{% block head_section %}
+  {{ super() }}{# Render the contents of the parent block #}
+  <style type="text/css">
+    .red { color: red; }
+  </style>
+{% endblock %}
+{% block header %}<h1>Hello</h1>{% endblock %}
+{% block content %}
+  <p class="red">hello, world!</p>
+{% endblock %}
