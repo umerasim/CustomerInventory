@@ -1,0 +1,1 @@
+from .CustomerInventory import app

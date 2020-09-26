@@ -1,0 +1,40 @@
+{% extends "Master.html" %}
+
+
+{% block head_section %}
+  {{ super() }}
+{% endblock %}
+
+{% block title %}Bank{% endblock %}
+
+
+{% block menu %}
+
+					<nav class="tm-main-nav">
+                                <ul class="tm-main-nav-ul">
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('bank') }}" class="tm-nav-item-link">Dashboard</a>
+                                </li>
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('bankCompanySearch') }}" class="tm-nav-item-link">Company Search</a>
+                                </li>
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('bankContactUs') }}" class="tm-nav-item-link">Contact Us</a>
+                                </li>
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('logout') }}" class="tm-nav-item-link">Log out</a>
+                                </li>
+                               
+                            </ul>
+                        </nav>
+
+{% endblock %}
+
+
+{% block page_title %} Bank Dashboard {% endblock %}
+
+
+
+{% block content %}
+  <p class="red">hello, Bank</p>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "Master.html" %}
+
+
+{% block head_section %}
+  {{ super() }}
+{% endblock %}
+
+{% block title %}Admininistration{% endblock %}
+
+
+{% block menu %}
+
+					<nav class="tm-main-nav">
+                                <ul class="tm-main-nav-ul">
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('admin') }}" class="tm-nav-item-link">Welcome</a>
+                                </li>
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('bankRegister') }}" class="tm-nav-item-link">Bank Register</a>
+                                </li>
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('companyRegister') }}" class="tm-nav-item-link">Company Register</a>
+                                </li>
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('adminTransactions') }}" class="tm-nav-item-link">Transactions</a>
+                                </li>
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('logout') }}" class="tm-nav-item-link">Log out</a>
+                                </li>
+                               
+                            </ul>
+                        </nav>
+
+{% endblock %}
+
+
+{% block page_title %} Admininistration Dashboard {% endblock %}
+
+
+
+{% block content %}
+  <p class="red">hello, Admin</p>
+{% endblock %}

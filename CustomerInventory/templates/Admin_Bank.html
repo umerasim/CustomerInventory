@@ -1,0 +1,24 @@
+{% extends "Admin.html" %}
+
+{% block title %}Admininistration-Bank{% endblock %}
+	
+{% block menu %}
+
+					<nav class="tm-main-nav">
+                                <ul class="tm-main-nav-ul">
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('admin') }}" class="tm-nav-item-link">Main Dashboard</a>
+                                </li>
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('bankRegister') }}" class="tm-nav-item-link">Register Bank</a>
+                                </li>
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('bankDelete') }}" class="tm-nav-item-link">Delete Bank</a>
+                                </li>     
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('logout') }}" class="tm-nav-item-link">Log out</a>
+                                </li>                          
+                            </ul>
+                        </nav>
+
+{% endblock %}
