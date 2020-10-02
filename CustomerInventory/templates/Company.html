@@ -16,6 +16,12 @@
                                     <a href="{{ url_for('company') }}" class="tm-nav-item-link">Dashboard</a>
                                 </li>
                                 <li class="tm-nav-item">
+                                    <a href="{{ url_for('uploadFile') }}" class="tm-nav-item-link">File Upload</a>
+                                </li>
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('transactions') }}" class="tm-nav-item-link">Transactions</a>
+                                </li>
+                                <li class="tm-nav-item">
                                     <a href="{{ url_for('logout') }}" class="tm-nav-item-link">Log out</a>
                                 </li>
                                
@@ -29,6 +35,56 @@
 
 
 
+
 {% block content %}
-  <p class="red">hello, Company</p>
+
+<h3 class="tm-blue-text ">Transactions</h3>
+  
+  <table style="width:100%" border=1>
+	  <tr>
+	    <th>Since Last 7 Days</th> 
+	    <th>This Month</th>
+	    <th>Total Transactions</th>
+	  </tr>
+	  <tr>
+	    <td>{{transactionsSummary[1].val}}</td>
+	    <td>{{transactionsSummary[2].val}}</td>
+	    <td>{{transactionsSummary[0].val}}</td>
+	  </tr>
+	</table>
+  
+  <br>
+  <br>
+  
+<h3 class="tm-blue-text ">Company Details</h3>
+  
+  	<table style="width:30%">
+	  <tr>
+	    <td><span style="font-weight:bold">Company Name</span></td>
+	    <td>{{company.company_name}}</td>
+	  </tr>
+	  <tr>
+	    <td><span style="font-weight:bold">Established Date</span></td>
+	    <td>{{company.company_establishdate}}</td>
+	    
+	  </tr>
+	  <tr>
+	    <td><span style="font-weight:bold">Company Type</span></td>
+	    <td>{{company.company_type}}</td>
+	  </tr>
+	  <tr>
+	    <td><span style="font-weight:bold">Website</span></td>
+	    <td>{{company.company_websiteurl}}</td>
+	  </tr>
+	  <tr>
+	    <td><span style="font-weight:bold">Annual Sale</span></td>
+	    <td>{{company.company_annualsale}}</td>
+	  </tr>
+	  <tr>
+	    <td><span style="font-weight:bold">Category</span></td>
+	    <td>{{company.company_membershipcategory}}</td>
+	  </tr>
+	</table>
+  
+  
 {% endblock %}

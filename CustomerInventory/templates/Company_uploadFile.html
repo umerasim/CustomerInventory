@@ -1,0 +1,21 @@
+{% extends "Company.html" %}
+
+{% block head_section %}
+  {{ super() }}
+{% endblock %}
+
+{% block page_subtitle %} Company Upload File {% endblock %}
+
+
+{% block content %}
+	<div class="msg">{{ msg }}</div>
+	<!doctype html>
+    <title>Upload an excel file</title>
+    <!-- <h1>Excel file upload (xls, xlsx Only using given formate)</h1> -->
+    <form action="uploadFile" method=post enctype=multipart/form-data><p>
+    <input type=file name=file><input type=submit value=uploadFile>
+    </form>
+
+
+
+{% endblock %}

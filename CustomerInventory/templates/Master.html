@@ -18,6 +18,16 @@ http://www.templatemo.com/tm-501-neaty
     <link rel="stylesheet" href="static/css/magnific-popup.css">                                <!-- Magnific pop up style, http://dimsemenov.com/plugins/magnific-popup/ -->
     <link rel="stylesheet" href="static/css/templatemo-style.css">                                   <!-- Templatemo style -->
 
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/magnific-popup.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/templatemo-style.css') }}">
+	
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+  
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+	
+	
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -46,7 +56,7 @@ http://www.templatemo.com/tm-501-neaty
                         
                         <div class="tm-content-div">
                             <!-- Welcome section -->
-                            <section id="galleryone" class="tm-section">
+                            <section id="galleryone" >
                                 <header>
                                     <h2 class="tm-blue-text tm-welcome-title tm-margin-b-45">{% block page_title %}{% endblock %}</h2>
                                     <h3 class="tm-blue-text ">{% block page_subtitle %}{% endblock %}</h3>
