@@ -7,6 +7,7 @@ from flask import Flask, render_template  # From module flask import class Flask
 from flask.globals import request
 import pandas as pd
 from functools import wraps
+import json
 
 app = Flask(__name__)  # Construct an instance of Flask class for our webapp
 
@@ -132,12 +133,78 @@ def adminTransactions():
 
 @app.route('/bank')
 def bank():
-    return render_template('Bank.html')
+    
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)    
+    
+    statesQuery = '''
+        Select 'totalCompany' as element, count(*) as val from inv_company
+        union 
+        Select 'today_transactions' as element, count(*) as val from inv_inventory where inventory_datetime between  CURRENT_DATE() AND CURRENT_DATE() + INTERVAL 1 DAY 
+        union 
+        Select 'last_7_days_transactions' as element, count(*) as val from inv_inventory where inventory_datetime between  DATE(NOW()) - INTERVAL 7 DAY AND DATE(NOW()) 
+        union
+        Select 'this_month' as element, count(*) as val from inv_inventory where (inventory_datetime between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND LAST_DAY(NOW()) )
+
+        '''    
+    cursor.execute(statesQuery)
+    states = cursor.fetchall()
+    
+    graphQuery = '''
+        select 
+            count(*) as count,
+            DATE_FORMAT(inventory_datetime,'%H:00') as time
+        from 
+            inv_inventory 
+        where
+            inventory_datetime between  CURRENT_DATE() AND CURRENT_DATE() + INTERVAL 1 DAY
+        group by 
+            DATE_FORMAT(inventory_datetime,'%H:00')
+        order by     
+            DATE_FORMAT(inventory_datetime,'%H:00')
+        '''
+
+    cursor.execute(graphQuery)
+    todayTransactionsGraphCursor = cursor.fetchall()
+    chartData = []
+    barChatLables = []
+    for i in range(len(todayTransactionsGraphCursor)):
+        transaction = todayTransactionsGraphCursor[i]
+        keyTime = "0" + str(i) + ":00" if i <= 9 else str(i) +":00"
+        barChatLables.append(keyTime)
+        if transaction['time'] == keyTime:
+           chartData.append(transaction['count'])
+        else:
+            chartData.append(0)
+        
+    
+    top5TransactinsCompanyQuery = '''
+        select 
+            count(*) as num, 
+            comp.company_name
+        from 
+            inv_inventory  inv, inv_company comp
+        where 
+            inv.company_id = comp.company_id
+        group by 
+            inv.company_id
+        order by 
+            count(*)
+        LIMIT 5
+        '''
+    
+    cursor.execute(top5TransactinsCompanyQuery)
+    top5TransactinsCompany = cursor.fetchall()
+    
+#     barChatLables = ["0", "1", "2", "3", "4", "5","6", "7", "8", "9", "10", "11","12", "13", "14", "15", "16", "17","18", "19", "20", "21", "22", "23"]
+#     chartData =  [4215, 5312, 6251, 7841, 9821, 14984,4215, 5312, 6251, 7841, 9821, 14984,4215, 5312, 6251, 7841, 9821, 14984,4215, 5312, 6251, 7841, 9821, 14984]
+    
+    return render_template('Bank.html',states = states, barChatLables = json.dumps(barChatLables), chartData = json.dumps(chartData), top5TransactinsCompany = top5TransactinsCompany )
 
 
 @app.route('/bankCompanySearch')
 def bankCompanySearch():
-    return render_template('Bank_Company_Search.html')
+    companyDetails = []
+    return render_template('Bank_Company_Search.html', companyDetails = companyDetails)
 
 
 @app.route('/bankContactUs')
@@ -161,14 +228,24 @@ def company():
         flash("Please log in")
         return redirect(url_for('login'))  
     
+#     
+#     transactionQuery = '''
+#                         Select 'total' as element, count(*) as val from inv_inventory
+#                         union 
+#                         Select 'week' as element, count(*) as val from inv_inventory where inventory_datetime > DATE(NOW()) - INTERVAL 7 DAY
+#                         union 
+#                         Select 'this_month' as element, count(*) as val from inv_inventory where (inventory_datetime between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND LAST_DAY(NOW()) )
+#                         ''' 
+    
     
     transactionQuery = '''
-                        Select 'total' as element, count(*) as val from inv_inventory
+                        Select 'total' as element, count(*) as val from inv_inventory where company_id = %s
                         union 
-                        Select 'week' as element, count(*) as val from inv_inventory where inventory_datetime > DATE(NOW()) - INTERVAL 7 DAY
+                        Select 'week' as element, count(*) as val from inv_inventory where company_id = %s and inventory_datetime > DATE(NOW()) - INTERVAL 7 DAY
                         union 
-                        Select 'this_month' as element, count(*) as val from inv_inventory where (inventory_datetime between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND LAST_DAY(NOW()) )
-                        ''' 
+                        Select 'this_month' as element, count(*) as val from inv_inventory where company_id = %s and (inventory_datetime between  DATE_FORMAT(NOW() ,'%Y-%m-01') AND LAST_DAY(NOW()) )
+
+                        '''.replace("%s", str(companyId))
     
     cursor.execute(transactionQuery)
     transactionsSummary = cursor.fetchall()
@@ -205,7 +282,13 @@ def uploadFile():
         
         for row in  range(data_xls.shape[0]):    
 #             INSERT INTO customer_inventory.inv_inventory VALUES           (null, 4, 'abc', 'x', 5, Timestamp('2020-10-09 00:00:00'), 10)        
-            query = 'INSERT INTO customer_inventory.inv_inventory VALUES (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s, NULL)' % (companyId, data_xls.iat[row, 0], data_xls.iat[row, 1], data_xls.iat[row, 2], data_xls.iat[row, 3], data_xls.iat[row, 4])
+#             query = 'INSERT INTO customer_inventory.inv_inventory VALUES (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s,NULL )' % (companyId, data_xls.iat[row, 0], data_xls.iat[row, 1], data_xls.iat[row, 2], data_xls.iat[row, 3], data_xls.iat[row, 4])
+            query = '''
+            INSERT INTO customer_inventory.inv_inventory 
+            (inventory_id, company_id, inventory_productname, inventory_mode, inventory_quantity,inventory_datetime, inventory_amount) VALUES 
+            (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s)
+            ''' % (companyId, data_xls.iat[row, 0], data_xls.iat[row, 1], data_xls.iat[row, 2], data_xls.iat[row, 3], data_xls.iat[row, 4])
+            
             print(query)
             cursor.execute(query)
         mysql.connection.commit()
@@ -231,7 +314,7 @@ def transactions():
         flash("Please log in")
         return redirect(url_for('login'))   
     
-    cursor.execute('SELECT * FROM customer_inventory.inv_inventory where comapny_id = %s;', (companyId,))
+    cursor.execute('SELECT * FROM customer_inventory.inv_inventory where company_id = %s;', (companyId,))
     allTransactions = cursor.fetchall()
     
     return render_template('Company_transactions.html', transactions = allTransactions)
