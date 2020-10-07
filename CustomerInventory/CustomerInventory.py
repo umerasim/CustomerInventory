@@ -8,6 +8,7 @@ from flask.globals import request
 import pandas as pd
 from functools import wraps
 import json
+from datetime import datetime
 
 app = Flask(__name__)  # Construct an instance of Flask class for our webapp
 
@@ -132,9 +133,20 @@ def adminTransactions():
 
 
 @app.route('/bank')
+@login_required
 def bank():
     
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)    
+    
+    bankId = 0;
+    userId = session.get('id')
+    cursor.execute('SELECT * FROM customer_inventory.inv_user where id = %s;', (userId,))
+    account = cursor.fetchone()
+    if account:
+        bankId = account['type_id']
+    else:
+        flash("Please log in")
+        return redirect(url_for('login'))
     
     statesQuery = '''
         Select 'totalCompany' as element, count(*) as val from inv_company
@@ -172,7 +184,7 @@ def bank():
         keyTime = "0" + str(i) + ":00" if i <= 9 else str(i) +":00"
         barChatLables.append(keyTime)
         if transaction['time'] == keyTime:
-           chartData.append(transaction['count'])
+            chartData.append(transaction['count'])
         else:
             chartData.append(0)
         
@@ -195,16 +207,69 @@ def bank():
     cursor.execute(top5TransactinsCompanyQuery)
     top5TransactinsCompany = cursor.fetchall()
     
+    top5SearchQuery = '''
+         SELECT search.date , company.company_name 
+         FROM inv_banksearch search, inv_company company 
+         where 
+         search.company = company.company_id
+         and 
+         bankid = %s
+         order by date desc LIMIT 5;
+        '''% (bankId)
+    
+    cursor.execute(top5SearchQuery)
+    top5Search = cursor.fetchall()
+    
 #     barChatLables = ["0", "1", "2", "3", "4", "5","6", "7", "8", "9", "10", "11","12", "13", "14", "15", "16", "17","18", "19", "20", "21", "22", "23"]
 #     chartData =  [4215, 5312, 6251, 7841, 9821, 14984,4215, 5312, 6251, 7841, 9821, 14984,4215, 5312, 6251, 7841, 9821, 14984,4215, 5312, 6251, 7841, 9821, 14984]
     
-    return render_template('Bank.html',states = states, barChatLables = json.dumps(barChatLables), chartData = json.dumps(chartData), top5TransactinsCompany = top5TransactinsCompany )
+    return render_template('Bank.html',states = states, barChatLables = json.dumps(barChatLables), chartData = json.dumps(chartData), top5TransactinsCompany = top5TransactinsCompany, top5Search = top5Search )
 
 
-@app.route('/bankCompanySearch')
+@app.route('/bankCompanySearch', methods=['GET', 'POST'])
+@login_required
 def bankCompanySearch():
     companyDetails = []
-    return render_template('Bank_Company_Search.html', companyDetails = companyDetails)
+    allCompanies = []
+    companyTransactions = []
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)  
+    if request.method == 'POST':
+        
+        bankId = 0;
+        userId = session.get('id')
+        cursor.execute('SELECT * FROM customer_inventory.inv_user where id = %s;', (userId,))
+        account = cursor.fetchone()
+        if account:
+            bankId = account['type_id']
+        else:
+            flash("Please log in")
+            return redirect(url_for('login'))
+         
+        companyName = request.form['companyName']
+        from_date = request.form['from_date']
+        to_date = request.form['to_date']
+        
+        companyDetails = "SELECT * FROM customer_inventory.inv_company where company_name = '"+companyName+"';"
+        cursor.execute(companyDetails)
+        companyDetails = cursor.fetchone()
+        
+        companyTransactions = "SELECT * FROM customer_inventory.inv_inventory where company_id = " + str(companyDetails['company_id']) + " and inventory_datetime between  '"+ str(from_date)+"' AND '"+str(to_date)+"'"
+        cursor.execute(companyTransactions)
+        companyTransactions = cursor.fetchall()
+        
+        query = '''
+             insert into customer_inventory.inv_banksearch values (NULL, %s, '%s', '%s', '%s', "%s")
+            ''' % (bankId, from_date, to_date, datetime.now(), companyDetails['company_id'])    
+        print(query)
+        cursor.execute(query)
+        mysql.connection.commit()
+      
+      
+    allCompanies = "SELECT * FROM customer_inventory.inv_company;"
+    cursor.execute(allCompanies)
+    allCompanies = cursor.fetchall()
+            
+    return render_template('Bank_Company_Search.html', allCompanies = allCompanies,  companyDetails = companyDetails,  companyTransactions = companyTransactions)
 
 
 @app.route('/bankContactUs')
@@ -299,6 +364,46 @@ def uploadFile():
         render_template('Company_uploadFile.html', msg = msg)
     return render_template('Company_uploadFile.html', msg = msg)
 
+
+@app.route('/uploadFileApi', methods=['POST'])
+def uploadFileApi():
+    msg = ""
+    if request.method == 'POST':
+#         return jsonify({"result": request.get_array(field_name='file')})
+        print(request.files['file'])
+        f = request.files['file']
+#         data_xls = pd.read_excel(f)
+        data_xls = pd.read_excel(f, sheet_name='Sheet1', usecols=['productname', 'mode', 'quantity', 'datetime', 'amount'])
+#         print(data_xls.columns.ravel())
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        
+        companyId = 0;
+        userId = session.get('id')
+        cursor.execute('SELECT * FROM customer_inventory.inv_user where id = %s;', (userId,))
+        account = cursor.fetchone()
+        if account:
+            companyId = account['type_id']
+        else:
+            flash("Please log in")
+            return redirect(url_for('login'))   
+        
+        for row in  range(data_xls.shape[0]):    
+#             INSERT INTO customer_inventory.inv_inventory VALUES           (null, 4, 'abc', 'x', 5, Timestamp('2020-10-09 00:00:00'), 10)        
+#             query = 'INSERT INTO customer_inventory.inv_inventory VALUES (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s,NULL )' % (companyId, data_xls.iat[row, 0], data_xls.iat[row, 1], data_xls.iat[row, 2], data_xls.iat[row, 3], data_xls.iat[row, 4])
+            query = '''
+            INSERT INTO customer_inventory.inv_inventory 
+            (inventory_id, company_id, inventory_productname, inventory_mode, inventory_quantity,inventory_datetime, inventory_amount) VALUES 
+            (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s)
+            ''' % (companyId, data_xls.iat[row, 0], data_xls.iat[row, 1], data_xls.iat[row, 2], data_xls.iat[row, 3], data_xls.iat[row, 4])
+            
+            print(query)
+            cursor.execute(query)
+        mysql.connection.commit()
+        msg = "File Uploaded Successfully. You can confirm this upload in transaction view."
+#             for col in range(data_xls.shape[1]):
+#                 print(data_xls.iat[row, col])
+        
+        return "<h1>File Uploaded Successfully</h1><p>Please login to Portal and verify</p>"
 
 @app.route('/transactions')
 def transactions():

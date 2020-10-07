@@ -4,7 +4,6 @@
 {% block head_section %}
   {{ super() }}
 		
-		<link href="static/css/xchartStyles.css" rel="stylesheet" />
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js" crossorigin="anonymous"></script>
   
 {% endblock %}
@@ -128,28 +127,17 @@
                                             
                                         </tfoot>
                                         <tbody>
+                                        
+                                        
+                                        {% for item in top5Search %}
                                             <tr>
-                                                <td>02/10/2020 12:30 AM</td>
-											    <td>Lulu</td>
+                                                <td>{{item.date}}</td>
+											    <td>{{item.company_name}}</td>
                                                 
                                             </tr>
-                                            <tr>
-                                                <td>02/10/2020 12:30 AM</td>
-											    <td>Nesto</td>
-                                            </tr>
-                                            <tr>
-                                                <td>02/10/2020 12:30 AM</td>
-											    <td>EMAX</td>
-                                            </tr>
-                                            <tr>
-                                               <td>02/10/2020 12:30 AM</td>
-											    <td>Super</td>
-                                            </tr>
-                                           <tr>
-                                                <td>02/10/2020 12:30 AM</td>
-											    <td>Gyper</td>
-                                            </tr>
-                                           
+                                         {% endfor %}
+                                        
+                                                 
                                         </tbody>
                                     </table>
                                 </div>
