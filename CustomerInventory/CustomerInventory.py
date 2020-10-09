@@ -9,11 +9,15 @@ import pandas as pd
 from functools import wraps
 import json
 from datetime import datetime
+from Crypto.Cipher import AES
+import base64
 
 app = Flask(__name__)  # Construct an instance of Flask class for our webapp
 
 # Change this to your secret key (can be anything, it's for extra protection)
 app.secret_key = 'thisIsMySecretKey'
+
+HASH_SALT = "Fr33L@nC!NG";
 
 # Enter your database connection details below
 # app.config['MYSQL_HOST'] = 'localhost'
@@ -179,14 +183,15 @@ def bank():
     todayTransactionsGraphCursor = cursor.fetchall()
     chartData = []
     barChatLables = []
-    for i in range(len(todayTransactionsGraphCursor)):
-        transaction = todayTransactionsGraphCursor[i]
+    for i in range(24):
+        if len(todayTransactionsGraphCursor) > i:
+            transaction = todayTransactionsGraphCursor[i]
         keyTime = "0" + str(i) + ":00" if i <= 9 else str(i) +":00"
         barChatLables.append(keyTime)
-        if transaction['time'] == keyTime:
+        if transaction and transaction['time'] == keyTime:
             chartData.append(transaction['count'])
         else:
-            chartData.append(0)
+            chartData.append(2)
         
     
     top5TransactinsCompanyQuery = '''
@@ -368,33 +373,19 @@ def uploadFile():
 @app.route('/uploadFileApi', methods=['POST'])
 def uploadFileApi():
     msg = ""
-    if request.method == 'POST':
+    if request.method == 'POST' and 'payload' in request.form:
 #         return jsonify({"result": request.get_array(field_name='file')})
-        print(request.files['file'])
-        f = request.files['file']
-#         data_xls = pd.read_excel(f)
-        data_xls = pd.read_excel(f, sheet_name='Sheet1', usecols=['productname', 'mode', 'quantity', 'datetime', 'amount'])
-#         print(data_xls.columns.ravel())
+
+        payloads = json.loads(request.form['payload'])
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        
-        companyId = 0;
-        userId = session.get('id')
-        cursor.execute('SELECT * FROM customer_inventory.inv_user where id = %s;', (userId,))
-        account = cursor.fetchone()
-        if account:
-            companyId = account['type_id']
-        else:
-            flash("Please log in")
-            return redirect(url_for('login'))   
-        
-        for row in  range(data_xls.shape[0]):    
+        for payload in  payloads["payload"]:    
 #             INSERT INTO customer_inventory.inv_inventory VALUES           (null, 4, 'abc', 'x', 5, Timestamp('2020-10-09 00:00:00'), 10)        
 #             query = 'INSERT INTO customer_inventory.inv_inventory VALUES (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s,NULL )' % (companyId, data_xls.iat[row, 0], data_xls.iat[row, 1], data_xls.iat[row, 2], data_xls.iat[row, 3], data_xls.iat[row, 4])
             query = '''
             INSERT INTO customer_inventory.inv_inventory 
             (inventory_id, company_id, inventory_productname, inventory_mode, inventory_quantity,inventory_datetime, inventory_amount) VALUES 
             (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s)
-            ''' % (companyId, data_xls.iat[row, 0], data_xls.iat[row, 1], data_xls.iat[row, 2], data_xls.iat[row, 3], data_xls.iat[row, 4])
+            ''' % (payloads["company_id"], payload["productname"], payload["mode"], payload["quantity"], payload["datetime"], payload["amount"])
             
             print(query)
             cursor.execute(query)
@@ -403,7 +394,9 @@ def uploadFileApi():
 #             for col in range(data_xls.shape[1]):
 #                 print(data_xls.iat[row, col])
         
-        return "<h1>File Uploaded Successfully</h1><p>Please login to Portal and verify</p>"
+        return "<h1>Transactions added Successfully</h1><p>Please login to Portal and verify</p>"
+    return "<h1>Error in adding Transactions</h1><p>Please Contact Administrator</p>"
+    
 
 @app.route('/transactions')
 def transactions():
