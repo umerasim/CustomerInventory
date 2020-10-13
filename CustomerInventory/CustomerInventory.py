@@ -106,17 +106,53 @@ def login_required(function_to_protect):
 
 @app.route('/admin')
 def admin():
-    return render_template('Admin.html')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)    
     
+    statesQuery = '''
+        Select count(*) as num , "total transactions" as element from inv_inventory
+        union
+        Select count(*) as num, "total companies" as element from inv_company
+        union
+        select count(*) as num, "total bank" as element from inv_bank;
+        '''    
+    cursor.execute(statesQuery)
+    states = cursor.fetchall()
+    return render_template('Admin.html', states = states)    
 
 @app.route('/bankRegister', methods=['GET', 'POST'])
 def bankRegister():
-    return render_template('Admin_Bank_Register.html')
+    msg = ""
+    if request.method == 'POST':
+        bankName = request.form['bankName']
+        shortCode = request.form['shortCode']
+        registrationDate = request.form['registrationDate']
+        registrationEnd = request.form['registrationEnd']
+        membershipCategory = request.form['membershipCategory']
+        
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        query = '''
+            insert into inv_bank values (Null, '%s' , '%s', '%s', '%s', '%s')
+            ''' % (bankName, shortCode, registrationDate, registrationEnd, membershipCategory)
+            
+        print(query)
+        cursor.execute(query)
+        mysql.connection.commit()
+        msg = "Bank Added Successfully"
+        return render_template('Admin_Bank_Register.html', msg = msg)
+    
+    return render_template('Admin_Bank_Register.html', msg = msg)
 
 
-@app.route('/bankDelete')
+@app.route('/bankDelete' , methods=['GET', 'POST'])
 def bankDelete():
-    return render_template('Admin_Bank_Delete.html')
+    banks = []
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    if request.method == 'POST':
+        return render_template('Admin_Bank_Delete.html', banks = banks)
+    
+    cursor.execute('SELECT * FROM customer_inventory.inv_bank')
+    banks = cursor.fetchall()
+    return render_template('Admin_Bank_Delete.html', banks = banks)
 
 
 @app.route('/companyRegister')

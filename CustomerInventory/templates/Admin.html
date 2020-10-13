@@ -39,5 +39,16 @@
 
 
 {% block content %}
-  <p class="red">hello, Admin</p>
+  
+  							<section id="Comaony" class="tm-section">
+                                <header><h2 class="tm-blue-text tm-section-title tm-margin-b-30">Total Companies Registered: {{states[1]['num']}}</h2></header>
+                            </section>
+							<section id="Bank" class="tm-section">
+                                <header><h2 class="tm-blue-text tm-section-title tm-margin-b-30">Total Banks Registered: {{states[2]['num']}}</h2></header>
+                            </section>
+							<section id="Transaction" class="tm-section">
+                                <header><h2 class="tm-blue-text tm-section-title tm-margin-b-30">Total Transactions: {{states[0]['num']}}</h2></header>
+                            </section>
+  
+  
 {% endblock %}

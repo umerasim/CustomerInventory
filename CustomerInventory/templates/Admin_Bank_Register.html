@@ -1,7 +1,83 @@
 {% extends "Admin_Bank.html" %}
 
-{% block page_subtitle %} Bank Registration {% endblock %}
 
 {% block content %}
-  <p class="red">hello, Admin for Bank Registration</p>
+  		
+  		<div class="register">
+			<h1>Register Bank</h1>
+			
+			<form action="{{ url_for('bankRegister') }}" method="post" autocomplete="off">
+				
+				
+				<table> 
+				
+				<tr>
+					<td>
+					Bank Name
+					</td>
+					<td>
+					<input type="text" name="bankName" placeholder="Bank Name" id="bankName" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Short Code
+					</td>
+					<td>
+					<input type="text" name="shortCode" placeholder="Short Code" id="shortCode" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Registration Start:
+					</td>
+					<td>
+					<input type="date" name="registrationDate" placeholder="registration Date" id="registrationDate" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Registration End:
+					</td>
+					<td>
+					<input type="date" name="registrationEnd" placeholder="registration End Date" id="registrationEnd" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Membership Category:
+					</td>
+					<td>
+					
+					<select name="membershipCategory" id="membershipCategory" required>
+					  <option value="A">A</option>
+					  <option value="B">B</option>
+					  <option value="C">C</option>
+					  <option value="D">D</option>
+					</select>
+					
+					
+					
+					</td>
+				</tr>
+				
+				</table>
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				<div class="msg">{{ msg }}</div>
+				<input type="submit" value="Register">
+			</form>
+		</div>
+		
 {% endblock %}

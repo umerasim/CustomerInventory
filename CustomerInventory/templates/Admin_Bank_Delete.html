@@ -3,5 +3,54 @@
 {% block page_subtitle %} Bank Delete {% endblock %}
 
 {% block content %}
-  <p class="red">hello, Admin for Bank Delete</p>
+  
+  
+  
+  {% if banks %}
+
+
+<div class="card-body">
+	<div class="table-responsive">
+		<table class="table table-bordered" id="dataTable" width="100%"
+			cellspacing="0">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Short Code</th>
+					<th>Registration Start</th>
+					<th>Registration End</th>
+					<th>Membership Category</th>
+
+				</tr>
+			</thead>
+			<tfoot>
+				<tr>
+					<th>Name</th>
+					<th>Short Code</th>
+					<th>Registration Start</th>
+					<th>Registration End</th>
+					<th>Membership Category</th>
+				</tr>
+			</tfoot>
+			<tbody>
+			
+			{% for bank in banks %}
+				<tr>
+					<td>{{bank.name}}</td>
+					<td>{{bank.shortcode}}</td>
+					<td>{{bank.registerationdate}}</td>
+					<td>{{bank.registerationenddate}}</td>
+					<td>{{bank.membershipcategory}}</td>
+
+				</tr>
+			{% endfor %}
+
+			</tbody>
+		</table>
+	</div>
+</div>
+
+{% endif %}
+  
+  
 {% endblock %}
