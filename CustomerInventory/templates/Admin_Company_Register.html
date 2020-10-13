@@ -1,7 +1,128 @@
 {% extends "Admin_Company.html" %}
 
-{% block page_subtitle %} Company Registration {% endblock %}
 
 {% block content %}
-  <p class="red">hello, Admin for Company Registration</p>
+  <div >
+			<h1>Register Company</h1>
+			
+			<form action="{{ url_for('companyRegister') }}" method="post" autocomplete="off">
+			
+				
+				<table> 
+				
+				<tr>
+					<td>
+					Company Name
+					</td>
+					<td>
+					<input type="text" name="company_name" placeholder="Company Name" id="company_name" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Establishdate
+					</td>
+					<td>
+					<input type="date" name="company_establishdate" placeholder="Company Establishdate" id="company_establishdate" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Type:
+					</td>
+					<td>
+					<input type="text" name="company_type" placeholder="Type" id="company_type" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Website url:
+					</td>
+					<td>
+					<input type="text" name="company_websiteurl" placeholder="Company Website url" id="company_websiteurl" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Employee Count:
+					</td>
+					<td>
+					<input type="text" name="company_employeecount" placeholder="Company Employee Count" id="company_employeecount" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Annual Sale:
+					</td>
+					<td>
+					<input type="text" name="company_annualsale" placeholder="company Annual Sale" id="company_annualsale" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Picture Path:
+					</td>
+					<td>
+					<input type="text" name="company_picturepath" placeholder="company Picture Path" id="company_picturepath" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Registeration Start Date:
+					</td>
+					<td>
+					<input type="date" name="company_registerationdate" placeholder="Registeration Start Date" id="company_registerationdate" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Registeration End Date:
+					</td>
+					<td>
+					<input type="date" name="company_registerationenddate" placeholder="Registeration End Date" id="company_registerationenddate" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Membership Category:
+					</td>
+					<td>
+					<input type="text" name="company_membershipcategory" placeholder="Membership Category" id="company_membershipcategory" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Address:
+					</td>
+					<td>
+					<input type="text" name="company_address" placeholder="Address" id="company_address" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					Phone:
+					</td>
+					<td>
+					<input type="text" name="company_phone" placeholder="Phone" id="company_phone" required>
+					</td>
+				</tr>
+				
+				</table>
+				
+				
+				<div class="msg">{{ msg }}</div>
+				<input type="submit" value="Register">
+			</form>
+		</div>
 {% endblock %}

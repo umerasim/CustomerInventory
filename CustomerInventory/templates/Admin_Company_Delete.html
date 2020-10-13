@@ -3,5 +3,70 @@
 {% block page_subtitle %} Company Delete {% endblock %}
 
 {% block content %}
-  <p class="red">hello, Admin for Company Delete</p>
+ 
+ 
+   
+  {% if companies %}
+
+
+<div class="card-body">
+	<div class="table-responsive">
+		<table class="table table-bordered" id="dataTable" width="100%"
+			cellspacing="0">
+			<thead>
+				<tr>
+					<th>company_name</th>
+					<th>company_establishdate</th>
+					<th>company_type</th>
+					<th>company_websiteurl</th>
+					<th>company_employeecount</th>
+					<th>company_annualsale</th>
+					<th>company_picturepath</th>
+					<th>company_registerationdate</th>
+					<th>company_registerationenddate</th>
+					<th>company_membershipcategory</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tfoot>
+				<tr>
+					<th>company_name</th>
+					<th>company_establishdate</th>
+					<th>company_type</th>
+					<th>company_websiteurl</th>
+					<th>company_employeecount</th>
+					<th>company_annualsale</th>
+					<th>company_picturepath</th>
+					<th>company_registerationdate</th>
+					<th>company_registerationenddate</th>
+					<th>company_membershipcategory</th>
+					<th>Action</th>
+				</tr>
+			</tfoot>
+			<tbody>
+					
+			{% for company in companies %}
+				<tr>
+					<td>{{company.company_name}}</td>
+					<td>{{company.company_establishdate}}</td>
+					<td>{{company.company_type}}</td>
+					<td>{{company.company_websiteurl}}</td>
+					<td>{{company.company_employeecount}}</td>
+					<td>{{company.company_annualsale}}</td>
+					<td>{{company.company_picturepath}}</td>
+					<td>{{company.company_registerationdate}}</td>
+					<td>{{company.company_registerationenddate}}</td>
+					<td>{{company.company_membershipcategory}}</td>
+					<td><a href="{{ url_for('companyDelete') }}/{{company.company_id}}" class="tm-nav-item-link">Delete</a></td>
+				</tr>
+			{% endfor %}
+
+			</tbody>
+		</table>
+	</div>
+</div>
+
+{% endif %}
+ 
+ 
 {% endblock %}

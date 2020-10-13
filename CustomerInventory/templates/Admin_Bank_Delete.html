@@ -1,6 +1,5 @@
 {% extends "Admin_Bank.html" %}
 
-{% block page_subtitle %} Bank Delete {% endblock %}
 
 {% block content %}
   
@@ -20,7 +19,7 @@
 					<th>Registration Start</th>
 					<th>Registration End</th>
 					<th>Membership Category</th>
-
+					<th>Action</th>
 				</tr>
 			</thead>
 			<tfoot>
@@ -30,6 +29,7 @@
 					<th>Registration Start</th>
 					<th>Registration End</th>
 					<th>Membership Category</th>
+					<th>Action</th>
 				</tr>
 			</tfoot>
 			<tbody>
@@ -41,7 +41,7 @@
 					<td>{{bank.registerationdate}}</td>
 					<td>{{bank.registerationenddate}}</td>
 					<td>{{bank.membershipcategory}}</td>
-
+					<td><a href="{{ url_for('bankDelete') }}/{{bank.id}}" class="tm-nav-item-link">Delete</a></td>
 				</tr>
 			{% endfor %}
 

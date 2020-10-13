@@ -143,7 +143,8 @@ def bankRegister():
     return render_template('Admin_Bank_Register.html', msg = msg)
 
 
-@app.route('/bankDelete' , methods=['GET', 'POST'])
+@app.route('/bankDelete' , methods=['GET'])
+@login_required
 def bankDelete():
     banks = []
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -155,19 +156,126 @@ def bankDelete():
     return render_template('Admin_Bank_Delete.html', banks = banks)
 
 
-@app.route('/companyRegister')
-def companyRegister():
-    return render_template('Admin_Company_Register.html')
+@app.route('/bankDelete/<int:id>' , methods=['GET'])
+@login_required
+def bankDeleteWithId(id):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    query = '''
+        delete from inv_bank where id = %s
+        ''' % (id)
+            
+    print(query)
+    cursor.execute(query)
+    mysql.connection.commit()
+    
+    return redirect(url_for('bankDelete'))
 
+
+@app.route('/companyRegister' , methods=['GET', 'POST'])
+def companyRegister():
+    msg = ""
+    if request.method == 'POST':
+        
+        company_name = request.form['company_name']
+        company_establishdate = request.form['company_establishdate']
+        company_type = request.form['company_type']
+        company_websiteurl = request.form['company_websiteurl']
+        company_employeecount = request.form['company_employeecount']
+        company_annualsale = request.form['company_annualsale']
+        company_picturepath = request.form['company_picturepath']
+        company_registerationdate = request.form['company_registerationdate']
+        company_registerationenddate = request.form['company_registerationenddate']
+        company_membershipcategory = request.form['company_membershipcategory']
+        company_address = request.form['company_address']
+        company_phone = request.form['company_phone']
+        
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        query = '''
+            INSERT INTO `customer_inventory`.`inv_company` 
+            (`company_name`, `company_establishdate`, `company_type`, `company_websiteurl`, `company_employeecount`, `company_annualsale`, `company_picturepath`, `company_registerationdate`, `company_registerationenddate`, `company_membershipcategory`, `login_id`, `company_address`, `company_phone`) 
+            VALUES 
+            ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
+            ''' %(str(company_name), str(company_establishdate), str(company_type), str(company_websiteurl), str(company_employeecount), str(company_annualsale), str(company_picturepath), str(company_registerationdate), str(company_registerationenddate), str(company_membershipcategory), str(0), str(company_address), str(company_phone))
+            
+        print(query)
+        cursor.execute(query)
+        mysql.connection.commit()
+        msg = "Company Added Successfully"
+        return render_template('Admin_Company_Register.html', msg = msg)
+    
+    return render_template('Admin_Company_Register.html', msg = msg)
+    
+    
 
 @app.route('/companyDelete')
 def companyDelete():
-    return render_template('Admin_Company_Delete.html')
+    companies = []
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    if request.method == 'POST':
+        return render_template('Admin_Company_Delete.html', companies = companies)
+    
+    cursor.execute('SELECT * FROM customer_inventory.inv_company')
+    companies = cursor.fetchall()
+    return render_template('Admin_Company_Delete.html', companies = companies)
+   
+@app.route('/companyDelete/<int:id>' , methods=['GET'])
+@login_required
+def companyDeleteWithId(id):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    query = '''
+        delete from inv_company where company_id = %s
+        ''' % (id)
+            
+    print(query)
+    cursor.execute(query)
+    mysql.connection.commit()
+    
+    return redirect(url_for('companyDelete'))
 
 
-@app.route('/adminTransactions')
+@app.route('/adminTransactions', methods=['GET', 'POST'])
 def adminTransactions():
-    return render_template('Admin_Transactions.html')
+    companyDetails = []
+    companyTransactions = []
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)  
+    if request.method == 'POST':
+        
+#         bankId = 0;
+#         userId = session.get('id')
+#         cursor.execute('SELECT * FROM customer_inventory.inv_user where id = %s;', (userId,))
+#         account = cursor.fetchone()
+#         if account:
+#             bankId = account['type_id']
+#         else:
+#             flash("Please log in")
+#             return redirect(url_for('login'))
+         
+        companyName = request.form['companyName']
+        from_date = request.form['from_date']
+        to_date = request.form['to_date']
+        
+        companyDetails = "SELECT * FROM customer_inventory.inv_company where company_name = '"+companyName+"';"
+        cursor.execute(companyDetails)
+        companyDetails = cursor.fetchone()
+        
+        companyTransactions = "SELECT * FROM customer_inventory.inv_inventory where company_id = " + str(companyDetails['company_id']) + " and inventory_datetime between  '"+ str(from_date)+"' AND '"+str(to_date)+"'"
+        cursor.execute(companyTransactions)
+        companyTransactions = cursor.fetchall()
+        
+#         query = '''
+#              insert into customer_inventory.inv_banksearch values (NULL, %s, '%s', '%s', '%s', "%s")
+#             ''' % (bankId, from_date, to_date, datetime.now(), companyDetails['company_id'])    
+#         print(query)
+#         cursor.execute(query)
+#         mysql.connection.commit()
+      
+      
+    allCompanies = "SELECT * FROM customer_inventory.inv_company;"
+    cursor.execute(allCompanies)
+    allCompanies = cursor.fetchall()
+            
+    return render_template('Admin_Transactions.html', allCompanies = allCompanies,  companyDetails = companyDetails,  companyTransactions = companyTransactions)
+
 
 #------------------ BANK
 
@@ -227,7 +335,7 @@ def bank():
         if transaction and transaction['time'] == keyTime:
             chartData.append(transaction['count'])
         else:
-            chartData.append(2)
+            chartData.append(0)
         
     
     top5TransactinsCompanyQuery = '''
