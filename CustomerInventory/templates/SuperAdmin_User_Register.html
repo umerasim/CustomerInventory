@@ -1,0 +1,148 @@
+{% extends "Master.html" %}
+
+{% block head_section %}
+  {{ super() }}
+  
+  <script>
+  
+  	//document.getElementById('bankTR').style.display='none';
+	//document.getElementById('companyTR').style.display='none';
+  
+  function changeType(el) {
+    //alert(el.value)
+    if(el.value == 'company'){
+        document.getElementById('bankTR').style.display='none';
+    	document.getElementById('companyTR').style.display='';
+    }else if(el.value == 'bank'){
+    	document.getElementById('companyTR').style.display='none';
+        document.getElementById('bankTR').style.display='';
+    }else if(el.value == 'admin'){
+    	document.getElementById('companyTR').style.display='none';
+        document.getElementById('bankTR').style.display='none';
+    }
+    
+	}
+  </script>
+  
+{% endblock %}
+
+{% block menu %}
+
+					<nav class="tm-main-nav">
+                                <ul class="tm-main-nav-ul">
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('superAdmin') }}" class="tm-nav-item-link">Add User</a>
+                                </li>
+                                <li class="tm-nav-item">
+                                    <a href="{{ url_for('deleteUser') }}" class="tm-nav-item-link">Delete User</a>
+                                </li>
+                                 <li class="tm-nav-item">
+                                    <a href="{{ url_for('logout') }}" class="tm-nav-item-link">Log out</a>
+                                </li>
+                                
+                            </ul>
+                        </nav>
+
+{% endblock %}
+
+{% block content %}
+  		
+  		<div class="register">
+			<h1>Register Login User</h1>
+			
+			<form action="{{ url_for('superAdmin') }}" method="post" autocomplete="off">
+				
+				
+				<table> 
+				
+				<tr>
+					<td>
+					User Name
+					</td>
+					<td>
+					<input type="text" name="userName" placeholder="User Name" id="userName" required>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+					User Id
+					</td>
+					<td>
+					<input type="text" name="userId" placeholder="User Id" id="userId" required>
+					</td>
+				</tr>
+				
+				
+				<tr>
+					<td>
+					Password
+					</td>
+					<td>
+					<input type="text" name="Password" placeholder="Password" id="Password" required>
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+					Type:
+					</td>
+					<td>
+					<select name="userType" id="userType" onchange="changeType(this)" required>
+					  <option value="0">Select Type</option>
+					  <option value="admin">admin</option>
+					  <option value="bank">bank</option>
+					  <option value="company">company</option>
+					</select>
+					</td>
+				</tr>
+				
+				
+				<tr id="companyTR" style="display:none;">
+					<td>
+					Company:
+					</td>
+					<td>
+					<select name="company_type_id" id="company_type_id" required>
+					<option value='0'>Select Company</option>
+					  {% for company in companies %}
+					  		<option value='{{company.company_id}}'>{{company.company_name}}</option>
+					  {% endfor %}
+					  
+					</select>
+					</td>
+				</tr>
+				
+				<tr id="bankTR" style="display:none;">
+					<td>
+					Bank:
+					</td>
+					<td>
+					<select name="bank_type_id" id="bank_type_id" required>
+					<option value='0'>Select Bank</option>
+					  {% for bank in banks %}
+					  		<option value='{{bank.id}}'>{{bank.name}}</option>
+					  {% endfor %}
+					  
+					  
+					</select>
+					</td>
+				</tr>
+				
+				
+				</table>
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				<div class="msg">{{ msg }}</div>
+				<input type="submit" value="Register">
+			</form>
+		</div>
+		
+{% endblock %}

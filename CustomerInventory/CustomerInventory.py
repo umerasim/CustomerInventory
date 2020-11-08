@@ -79,6 +79,8 @@ def login():
                 return redirect(url_for('bank'))
             elif account['user_type'] == 'company':
                 return redirect(url_for('company'))
+            elif account['user_type'] == 'SuperAdmin':
+                return redirect(url_for('superAdmin'))
             
             # Redirect to home page
 #             return 'Logged in successfully!'
@@ -233,6 +235,132 @@ def companyDeleteWithId(id):
     return redirect(url_for('companyDelete'))
 
 
+@app.route('/userRegister')
+def userRegister():
+    companies = []
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    if request.method == 'POST': 
+        return render_template('Admin_Company_Delete.html', companies = companies)
+    
+    cursor.execute('SELECT * FROM customer_inventory.inv_company')
+    companies = cursor.fetchall()
+    return render_template('Admin_Company_Delete.html', companies = companies)
+
+@app.route('/superAdmin', methods=['GET', 'POST'])
+def superAdmin():
+    msg = "";
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    
+    cursor.execute('SELECT * FROM customer_inventory.inv_company')
+    companies = cursor.fetchall()
+    
+    cursor.execute('SELECT * FROM customer_inventory.inv_bank')
+    banks = cursor.fetchall()
+    
+    if request.method == 'POST':
+        
+        userName = request.form['userName']
+        userId = request.form['userId']
+        Password = request.form['Password']
+        userType = request.form['userType']
+        
+        if userType == 'company':
+            type_id = request.form['company_type_id']
+        elif userType == 'bank':
+            type_id = request.form['bank_type_id']
+        
+        if userType != 'admin' and type_id == str(0):
+            msg = "Please Select Company/Bank"
+            return render_template('SuperAdmin_User_Register.html', companies=companies, banks=banks, msg=msg)
+        
+        
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        query = '''
+            insert into inv_user values (Null, '%s' , '%s', '%s', '%s', '%s', '%s')
+            ''' % (userName, userId, Password, userType, type_id, 3)
+            
+        print(query)
+        cursor.execute(query)
+        mysql.connection.commit()
+        msg = "User Added Successfully"
+       
+        
+        return render_template('SuperAdmin_User_Register.html', companies=companies, banks=banks, msg = msg)
+    
+    
+    
+    return render_template('SuperAdmin_User_Register.html', companies=companies, banks=banks, msg=msg)
+
+
+@app.route('/deleteUser')
+def deleteUser(): 
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT * FROM customer_inventory.inv_user')
+    users = cursor.fetchall()  
+    
+    for user in users:
+        if user['user_type'] == 'bank':
+            cursor.execute('select * from inv_bank where id =  %s;', (str(user['type_id'])))
+            bank = cursor.fetchone()
+            if bank:
+                user['type_name'] = bank['name']
+            else:
+                user['type_name'] = 'Unknown Bank'
+        if user['user_type'] == 'company':
+            cursor.execute('select * from inv_company where company_id =  %s;', (str(user['type_id'])))
+            compay = cursor.fetchone()
+            if compay:
+                user['type_name'] = compay['company_name']
+            else:
+                user['type_name'] = 'unknown Company'
+        if user['user_type'] == 'admin':
+            user['type_name'] = 'admin'
+        if user['user_type'] == 'SuperAdmin':
+            user['id'] = 'admin'
+    
+    return render_template('SuperAdmin_User_Delete.html', users = users)
+
+@app.route('/deleteUser/<int:id>' , methods=['GET'])
+@login_required
+def userDeleteWithId(id):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    query = '''
+        delete from inv_user where id = %s
+        ''' % (id)
+            
+    print(query)
+    cursor.execute(query)
+    mysql.connection.commit()
+    
+    return redirect(url_for('deleteUser'))
+
+@app.route('/userManagementDelete')
+def userManagement():
+    companies = []
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    if request.method == 'POST':
+        return render_template('Admin_Company_Delete.html', companies = companies)
+    
+    cursor.execute('SELECT * FROM customer_inventory.inv_company')
+    companies = cursor.fetchall()
+    return render_template('Admin_Company_Delete.html', companies = companies)
+   
+@app.route('/userManagementDelete/<int:id>' , methods=['GET'])
+@login_required
+def userManagementDeleteWithId(id):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    query = '''
+        delete from inv_company where company_id = %s
+        ''' % (id)
+            
+    print(query)
+    cursor.execute(query)
+    mysql.connection.commit()
+    
+    return redirect(url_for('companyDelete'))
+
+
+
 @app.route('/adminTransactions', methods=['GET', 'POST'])
 def adminTransactions():
     companyDetails = []
@@ -327,6 +455,7 @@ def bank():
     todayTransactionsGraphCursor = cursor.fetchall()
     chartData = []
     barChatLables = []
+    transaction = None
     for i in range(24):
         if len(todayTransactionsGraphCursor) > i:
             transaction = todayTransactionsGraphCursor[i]
@@ -517,11 +646,21 @@ def uploadFile():
 @app.route('/uploadFileApi', methods=['POST'])
 def uploadFileApi():
     msg = ""
-    if request.method == 'POST' and 'payload' in request.form:
+    if request.method == 'POST' and 'payload' in request.form and request.headers.get("companyUser") and request.headers.get("companyPass"):
 #         return jsonify({"result": request.get_array(field_name='file')})
 
-        payloads = json.loads(request.form['payload'])
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        companyUser = request.headers.get("companyUser");
+        companyPass = request.headers.get("companyPass");
+        cursor.execute('SELECT * FROM customer_inventory.inv_user where user_id = %s and pass = %s;', (companyUser, companyPass))
+        # Fetch one record and return result
+        CompamyAccount = cursor.fetchone()
+        
+        if CompamyAccount == None or CompamyAccount['user_type'] != 'company':
+            return "<h1>Error in adding Transactions</h1><p>Please Contact Administrator</p>"
+        
+        payloads = json.loads(request.form['payload'])
+#         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         for payload in  payloads["payload"]:    
 #             INSERT INTO customer_inventory.inv_inventory VALUES           (null, 4, 'abc', 'x', 5, Timestamp('2020-10-09 00:00:00'), 10)        
 #             query = 'INSERT INTO customer_inventory.inv_inventory VALUES (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s,NULL )' % (companyId, data_xls.iat[row, 0], data_xls.iat[row, 1], data_xls.iat[row, 2], data_xls.iat[row, 3], data_xls.iat[row, 4])
@@ -529,7 +668,7 @@ def uploadFileApi():
             INSERT INTO customer_inventory.inv_inventory 
             (inventory_id, company_id, inventory_productname, inventory_mode, inventory_quantity,inventory_datetime, inventory_amount) VALUES 
             (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s)
-            ''' % (payloads["company_id"], payload["productname"], payload["mode"], payload["quantity"], payload["datetime"], payload["amount"])
+            ''' % (CompamyAccount['type_id'], payload["productname"], payload["mode"], payload["quantity"], payload["datetime"], payload["amount"])
             
             print(query)
             cursor.execute(query)

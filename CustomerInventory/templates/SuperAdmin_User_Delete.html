@@ -1,0 +1,56 @@
+{% extends "SuperAdmin_User_Register.html" %}
+
+
+{% block content %}
+  
+  
+  
+  {% if users %}
+
+
+<div class="card-body">
+	<div class="table-responsive">
+		<table class="table table-bordered" id="dataTable" width="100%"
+			cellspacing="0">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>User ID</th>
+					<th>Password</th>
+					<th>User Type</th>
+					<th>Company/Bank Name</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tfoot>
+				<tr>
+					<th>Name</th>
+					<th>User ID</th>
+					<th>Password</th>
+					<th>User Type</th>
+					<th>Company/Bank Name</th>
+					<th>Action</th>
+				</tr>
+			</tfoot>
+			<tbody>
+			
+			{% for user in users %}
+				<tr>
+					<td>{{user.user_name}}</td>
+					<td>{{user.user_id}}</td>
+					<td>{{user.pass}}</td>
+					<td>{{user.user_type}}</td>
+					<td>{{user.type_name}}</td>
+					<td><a href="{{ url_for('deleteUser') }}/{{user.id}}" class="tm-nav-item-link">Delete</a></td>
+				</tr>
+			{% endfor %}
+
+			</tbody>
+		</table>
+	</div>
+</div>
+
+{% endif %}
+  
+  
+{% endblock %}
