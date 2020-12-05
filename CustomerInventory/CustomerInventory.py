@@ -609,7 +609,7 @@ def uploadFile():
         print(request.files['file'])
         f = request.files['file']
 #         data_xls = pd.read_excel(f)
-        data_xls = pd.read_excel(f, sheet_name='Sheet1', usecols=['productname', 'mode', 'quantity', 'datetime', 'amount'])
+        data_xls = pd.read_excel(f, sheet_name='Sheet1', usecols=['productname', 'mode', 'quantity', 'datetime', 'amount', 'companysold'])
 #         print(data_xls.columns.ravel())
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         
@@ -628,9 +628,9 @@ def uploadFile():
 #             query = 'INSERT INTO customer_inventory.inv_inventory VALUES (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s,NULL )' % (companyId, data_xls.iat[row, 0], data_xls.iat[row, 1], data_xls.iat[row, 2], data_xls.iat[row, 3], data_xls.iat[row, 4])
             query = '''
             INSERT INTO customer_inventory.inv_inventory 
-            (inventory_id, company_id, inventory_productname, inventory_mode, inventory_quantity,inventory_datetime, inventory_amount) VALUES 
-            (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s)
-            ''' % (companyId, data_xls.iat[row, 0], data_xls.iat[row, 1], data_xls.iat[row, 2], data_xls.iat[row, 3], data_xls.iat[row, 4])
+            (inventory_id, company_id, inventory_productname, inventory_mode, inventory_quantity,inventory_datetime, inventory_amount, inventory_companysold) VALUES 
+            (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s, \'%s\')
+            ''' % (companyId, data_xls.iat[row, 0], data_xls.iat[row, 1], data_xls.iat[row, 2], data_xls.iat[row, 3], data_xls.iat[row, 4], data_xls.iat[row, 5])
             
             print(query)
             cursor.execute(query)
@@ -666,9 +666,9 @@ def uploadFileApi():
 #             query = 'INSERT INTO customer_inventory.inv_inventory VALUES (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s,NULL )' % (companyId, data_xls.iat[row, 0], data_xls.iat[row, 1], data_xls.iat[row, 2], data_xls.iat[row, 3], data_xls.iat[row, 4])
             query = '''
             INSERT INTO customer_inventory.inv_inventory 
-            (inventory_id, company_id, inventory_productname, inventory_mode, inventory_quantity,inventory_datetime, inventory_amount) VALUES 
-            (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s)
-            ''' % (CompamyAccount['type_id'], payload["productname"], payload["mode"], payload["quantity"], payload["datetime"], payload["amount"])
+            (inventory_id, company_id, inventory_productname, inventory_mode, inventory_quantity, inventory_datetime, inventory_amount, inventory_companysold) VALUES 
+            (NULL, %s,\'%s\',\'%s\', %s, Timestamp(\'%s\'), %s, \'%s\')
+            ''' % (CompamyAccount['type_id'], payload["productname"], payload["mode"], payload["quantity"], payload["datetime"], payload["amount"], payload["companysold"])
             
             print(query)
             cursor.execute(query)

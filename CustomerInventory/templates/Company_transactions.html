@@ -73,6 +73,7 @@ endblock %} {% block content %}
 		<th style="width: 10%;">Quantity</th>
 		<th style="width: 20%;">Date/Time</th>
 		<th style="width: 10%;">Ammount</th>
+		<th style="width: 10%;">Sold to Company</th>
 		<th style="width: 20%;">Uploaded On</th>
 	</tr>
 
@@ -83,6 +84,7 @@ endblock %} {% block content %}
 		<td>{{transaction.inventory_quantity}}</td>
 		<td>{{transaction.inventory_datetime}}</td>
 		<td>{{transaction.inventory_amount}}</td>
+		<td>{{transaction.inventory_companysold}}</td>
 		<td>{{transaction.created_on}}</td>
 	</tr>
 	{% endfor %}
